@@ -1,10 +1,10 @@
 [package]
-name = "imgmod"
+name = "imgfx"
 version = "0.1.0"
 edition = "2021"
 authors = ["Gabriel Hooks"]
 description = "Image filtering and modulating with bitwise, arithmetic, and logical operations."
-repository = "https://github.com/Echinoidea/imgmod-crate"
+repository = "https://github.com/Echinoidea/imgfx-crate"
 keywords = ["image", "images", "graphics"]
 license = "MIT"
 license_file = "LICENSE.md"
