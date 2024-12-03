@@ -147,7 +147,6 @@ pub fn bitshift(
     img: DynamicImage,
     direction: BitshiftDirection,
     lhs: Option<Vec<String>>,
-
     bits: u8,
     raw: bool,
 ) -> RgbaImage {
@@ -235,11 +234,113 @@ mod tests {
     }
 
     #[test]
-    fn test_add() {
+    fn test_left() {
         let red = load_image("ff0000.png".to_string());
         let control_color = get_color_from_control(red.clone());
 
-        let out = left(red.clone(), 1);
+        let out = bitshift(
+            red.clone(),
+            BitshiftDirection::LEFT,
+            Some(vec!["r".to_string(), "g".to_string(), "b".to_string()]),
+            1,
+            false,
+        );
+
+        println!(
+            "{:?} == {:?}",
+            control_color,
+            out.get_pixel(0, 0).to_rgb().0
+        );
+
+        const EXPECTED: Rgb<u8> = Rgb([255, 0, 0]);
+
+        assert_eq!(out.get_pixel(0, 0).to_rgb(), EXPECTED)
+    }
+
+    #[test]
+    fn test_right() {
+        let red = load_image("ff0000.png".to_string());
+        let control_color = get_color_from_control(red.clone());
+
+        let out = bitshift(
+            red.clone(),
+            BitshiftDirection::RIGHT,
+            Some(vec!["r".to_string(), "g".to_string(), "b".to_string()]),
+            1,
+            false,
+        );
+
+        println!(
+            "{:?} == {:?}",
+            control_color,
+            out.get_pixel(0, 0).to_rgb().0
+        );
+
+        const EXPECTED: Rgb<u8> = Rgb([127, 0, 0]);
+
+        assert_eq!(out.get_pixel(0, 0).to_rgb(), EXPECTED)
+    }
+
+    #[test]
+    fn test_or() {
+        let red = load_image("ff0000.png".to_string());
+        let control_color = get_color_from_control(red.clone());
+
+        let out = or(
+            red.clone(),
+            Some(vec!["r".to_string(), "g".to_string(), "b".to_string()]),
+            None,
+            RgbColor(0, 0, 255),
+            false,
+        );
+
+        println!(
+            "{:?} == {:?}",
+            control_color,
+            out.get_pixel(0, 0).to_rgb().0
+        );
+
+        const EXPECTED: Rgb<u8> = Rgb([255, 0, 255]);
+
+        assert_eq!(out.get_pixel(0, 0).to_rgb(), EXPECTED)
+    }
+
+    #[test]
+    fn test_and() {
+        let red = load_image("ff0000.png".to_string());
+        let control_color = get_color_from_control(red.clone());
+
+        let out = and(
+            red.clone(),
+            Some(vec!["r".to_string(), "g".to_string(), "b".to_string()]),
+            None,
+            RgbColor(0, 0, 255),
+            false,
+        );
+
+        println!(
+            "{:?} == {:?}",
+            control_color,
+            out.get_pixel(0, 0).to_rgb().0
+        );
+
+        const EXPECTED: Rgb<u8> = Rgb([0, 0, 0]);
+
+        assert_eq!(out.get_pixel(0, 0).to_rgb(), EXPECTED)
+    }
+
+    #[test]
+    fn test_xor() {
+        let red = load_image("ff0000.png".to_string());
+        let control_color = get_color_from_control(red.clone());
+
+        let out = xor(
+            red.clone(),
+            Some(vec!["r".to_string(), "g".to_string(), "b".to_string()]),
+            None,
+            RgbColor(0, 0, 255),
+            false,
+        );
 
         println!(
             "{:?} == {:?}",
