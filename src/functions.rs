@@ -93,3 +93,66 @@ pub fn bloom(
 
     output
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use image::{Pixel, Rgb};
+    use std::env;
+    use std::path::PathBuf;
+
+    fn get_file_path(file_name: String) -> PathBuf {
+        let mut path = env::current_dir().expect("Failed to get current directory");
+        path.push("assets/control-images/");
+        path.push(file_name);
+        path
+    }
+
+    fn load_image(file_name: String) -> DynamicImage {
+        let path = get_file_path(file_name);
+        let img = image::open(path).expect("Failed to open image.");
+
+        img
+    }
+
+    fn get_color_from_control(img: DynamicImage) -> Rgb<u8> {
+        let pixel = img.get_pixel(0, 0);
+        return pixel.to_rgb();
+    }
+
+    #[test]
+    fn test_average() {
+        let red = load_image("ff0000.png".to_string());
+        let control_color = get_color_from_control(red.clone());
+
+        let out = average(red.clone(), None, None, RgbColor(0, 0, 255));
+
+        println!(
+            "{:?} == {:?}",
+            control_color,
+            out.get_pixel(0, 0).to_rgb().0
+        );
+
+        const EXPECTED: Rgb<u8> = Rgb([127, 0, 127]);
+
+        assert_eq!(out.get_pixel(0, 0).to_rgb(), EXPECTED)
+    }
+
+    #[test]
+    fn test_bloom() {
+        let red = load_image("ff0000.png".to_string());
+        let control_color = get_color_from_control(red.clone());
+
+        let out = bloom(red.clone(), None, None, RgbColor(0, 0, 255), 1.0);
+
+        println!(
+            "{:?} == {:?}",
+            control_color,
+            out.get_pixel(0, 0).to_rgb().0
+        );
+
+        const EXPECTED: Rgb<u8> = Rgb([255, 0, 0]);
+
+        assert_eq!(out.get_pixel(0, 0).to_rgb(), EXPECTED)
+    }
+}
