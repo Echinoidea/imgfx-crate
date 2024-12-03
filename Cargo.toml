@@ -1,7 +1,12 @@
 [package]
-name = "imgmod-crate"
+name = "imgmod"
 version = "0.1.0"
 edition = "2021"
+authors = ["Gabriel Hooks"]
+description = "Image filtering and modulating with bitwise, arithmetic, and logical operations."
+repository = "https://github.com/Echinoidea/imgmod-crate"
+keywords = ["image", "images"]
+
 
 [dependencies]
 image = "0.25.5"
