@@ -13,3 +13,4 @@ license_file = "LICENSE.md"
 [dependencies]
 image = "0.25.5"
 clap = { version = "4.5.20", features = ["derive"] }
+rayon = "1.10.0"

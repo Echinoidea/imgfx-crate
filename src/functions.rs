@@ -1,7 +1,14 @@
-use clap::builder::styling::RgbColor;
-use image::{imageops::blur, DynamicImage, GenericImageView, ImageBuffer, Rgba, RgbaImage};
-
 use crate::utils::{get_channel_by_name_rgb_color, get_channel_by_name_rgba_u8};
+use clap::builder::styling::RgbColor;
+use image::{
+    imageops::{blur, fast_blur},
+    DynamicImage, GenericImageView, ImageBuffer, Rgba, RgbaImage,
+};
+use rayon::prelude::*;
+
+pub fn greyscale(img: DynamicImage) -> RgbaImage {
+    return Into::into(img.grayscale());
+}
 
 pub fn average(
     img: DynamicImage,
@@ -87,7 +94,7 @@ pub fn bloom(
         }
     }
 
-    let blurred_light = blur(&light_mask, blur_radius);
+    let blurred_light = fast_blur(&light_mask, blur_radius);
 
     let mut output: RgbaImage = ImageBuffer::new(width, height);
 

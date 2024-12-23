@@ -1,7 +1,7 @@
+use crate::utils::{get_channel_by_name_rgb_color, get_channel_by_name_rgba_u8};
 use clap::builder::styling::RgbColor;
 use image::{DynamicImage, GenericImageView, ImageBuffer, Rgba, RgbaImage};
-
-use crate::utils::{get_channel_by_name_rgb_color, get_channel_by_name_rgba_u8};
+use rayon::prelude::*;
 
 pub fn overlay(
     img: DynamicImage,
@@ -22,7 +22,7 @@ pub fn overlay(
         None => (color.r(), color.g(), color.b()),
     };
 
-    output.enumerate_pixels_mut().for_each(|(x, y, pixel)| {
+    output.par_enumerate_pixels_mut().for_each(|(x, y, pixel)| {
         let in_pixel = img.get_pixel(x, y);
 
         let lhs = match lhs {
@@ -79,7 +79,7 @@ pub fn screen(
         None => (color.r(), color.g(), color.b()),
     };
 
-    output.enumerate_pixels_mut().for_each(|(x, y, pixel)| {
+    output.par_enumerate_pixels_mut().for_each(|(x, y, pixel)| {
         let in_pixel = img.get_pixel(x, y);
 
         let lhs = match lhs {
