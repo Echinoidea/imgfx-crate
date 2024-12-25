@@ -54,7 +54,7 @@ impl FromStr for SortBy {
             "s" => Ok(SortBy::Saturation),
             "v" => Ok(SortBy::Value),
 
-            _ => Err(format!("Invalid direction: {}", s)),
+            _ => Err(format!("Invalid sort_by factor: {}", s)),
         }
     }
 }
@@ -125,6 +125,7 @@ pub fn sort(
     sort_by: SortBy,
     min_threshold: f32,
     max_threshold: f32,
+    reversed: bool,
 ) -> RgbaImage {
     let (width, height) = img.dimensions();
     let mut output: RgbaImage = img.clone();
@@ -144,7 +145,11 @@ pub fn sort(
                     .cloned()
                     .collect();
 
-                sortable_pixels.sort_by(&sorter);
+                if reversed {
+                    sortable_pixels.sort_by(|a, b| sorter(b, a));
+                } else {
+                    sortable_pixels.sort_by(&sorter);
+                }
 
                 let mut sortable_iter = sortable_pixels.into_iter();
 
@@ -170,7 +175,11 @@ pub fn sort(
                     .cloned()
                     .collect();
 
-                sortable_pixels.sort_by(&sorter);
+                if reversed {
+                    sortable_pixels.sort_by(|a, b| sorter(b, a));
+                } else {
+                    sortable_pixels.sort_by(&sorter);
+                }
 
                 let mut sortable_iter = sortable_pixels.into_iter();
 
