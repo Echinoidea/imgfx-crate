@@ -183,23 +183,12 @@ pub fn bitshift(
                     )
                 }
             }
-            BitshiftDirection::RIGHT => {
-                if raw {
-                    (
-                        (lhs.0 >> bits),
-                        (lhs.1 >> bits),
-                        (lhs.2 >> bits),
-                        in_pixel[3],
-                    )
-                } else {
-                    (
-                        (lhs.0.wrapping_shr(bits.into())),
-                        (lhs.1.wrapping_shr(bits.into())),
-                        (lhs.2.wrapping_shr(bits.into())),
-                        in_pixel[3],
-                    )
-                }
-            }
+            BitshiftDirection::RIGHT => (
+                (lhs.0.wrapping_shr(bits.into())),
+                (lhs.1.wrapping_shr(bits.into())),
+                (lhs.2.wrapping_shr(bits.into())),
+                in_pixel[3],
+            ),
         };
         *pixel = Rgba([r, g, b, a]);
     });
