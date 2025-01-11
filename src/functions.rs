@@ -1,9 +1,6 @@
 use crate::utils::{get_channel_by_name_rgb_color, get_channel_by_name_rgba_u8};
 use clap::builder::styling::RgbColor;
-use image::{
-    imageops::{blur, fast_blur},
-    DynamicImage, GenericImageView, ImageBuffer, Rgba, RgbaImage,
-};
+use image::{imageops::fast_blur, DynamicImage, GenericImageView, ImageBuffer, Rgba, RgbaImage};
 use rayon::prelude::*;
 
 pub fn greyscale(img: DynamicImage) -> RgbaImage {
@@ -29,7 +26,7 @@ pub fn average(
         None => (color.r(), color.g(), color.b()),
     };
 
-    output.enumerate_pixels_mut().for_each(|(x, y, pixel)| {
+    output.par_enumerate_pixels_mut().for_each(|(x, y, pixel)| {
         let in_pixel = img.get_pixel(x, y);
 
         let lhs = match lhs {
@@ -57,8 +54,8 @@ pub fn average(
 
 pub fn bloom(
     img: DynamicImage,
-    intensity: f32,
-    blur_radius: f32,
+    intensity: f64,
+    blur_radius: f64,
     min_threshold: u8,
     max_threshold: Option<u8>,
 ) -> RgbaImage {
@@ -74,18 +71,18 @@ pub fn bloom(
         let b = pixel[2];
 
         //  = 0.2126 R + 0.7152 G + 0.0722 B
-        let luminance = 0.2126 * (r as f32) + 0.7152 * (g as f32) + 0.0722 * (b as f32);
+        let luminance = 0.2126 * (r as f64) + 0.7152 * (g as f64) + 0.0722 * (b as f64);
 
         match max_threshold {
             Some(threshold) => {
-                if luminance > min_threshold as f32 && luminance < threshold as f32 {
+                if luminance > min_threshold as f64 && luminance < threshold as f64 {
                     light_mask.put_pixel(x, y, Rgba([r, g, b, pixel[3]]));
                 } else {
                     light_mask.put_pixel(x, y, Rgba([0, 0, 0, 0]));
                 }
             }
             None => {
-                if luminance > min_threshold as f32 {
+                if luminance > min_threshold as f64 {
                     light_mask.put_pixel(x, y, Rgba([r, g, b, pixel[3]]));
                 } else {
                     light_mask.put_pixel(x, y, Rgba([0, 0, 0, 0]));
@@ -94,7 +91,7 @@ pub fn bloom(
         }
     }
 
-    let blurred_light = fast_blur(&light_mask, blur_radius);
+    let blurred_light = fast_blur(&light_mask, blur_radius as f32);
 
     let mut output: RgbaImage = ImageBuffer::new(width, height);
 
@@ -103,9 +100,9 @@ pub fn bloom(
 
         // Blend the blurred light with the original image
         let (r, g, b) = (
-            ((pixel[0] as f32) + (blurred_pixel[0] as f32 * intensity)).min(255.0) as u8,
-            ((pixel[1] as f32) + (blurred_pixel[1] as f32 * intensity)).min(255.0) as u8,
-            ((pixel[2] as f32) + (blurred_pixel[2] as f32 * intensity)).min(255.0) as u8,
+            ((pixel[0] as f64) + (blurred_pixel[0] as f64 * intensity)).min(255.0) as u8,
+            ((pixel[1] as f64) + (blurred_pixel[1] as f64 * intensity)).min(255.0) as u8,
+            ((pixel[2] as f64) + (blurred_pixel[2] as f64 * intensity)).min(255.0) as u8,
         );
 
         let a = pixel[3];

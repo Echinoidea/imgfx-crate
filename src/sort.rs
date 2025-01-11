@@ -61,17 +61,17 @@ impl FromStr for SortBy {
 
 fn generate_filter(
     sort_by: SortBy,
-    min_threshold: f32,
-    max_threshold: f32,
+    min_threshold: f64,
+    max_threshold: f64,
 ) -> impl Fn(&Rgba<u8>) -> bool {
     move |pixel| match sort_by {
         SortBy::Luminance => {
             let luminance = calc_luminance(*pixel);
             luminance > min_threshold && luminance < max_threshold
         }
-        SortBy::Red => pixel.0[0] as f32 > min_threshold && (pixel.0[0] as f32) < max_threshold,
-        SortBy::Green => pixel.0[1] as f32 > min_threshold && (pixel.0[1] as f32) < max_threshold,
-        SortBy::Blue => pixel.0[2] as f32 > min_threshold && (pixel.0[2] as f32) < max_threshold,
+        SortBy::Red => pixel.0[0] as f64 > min_threshold && (pixel.0[0] as f64) < max_threshold,
+        SortBy::Green => pixel.0[1] as f64 > min_threshold && (pixel.0[1] as f64) < max_threshold,
+        SortBy::Blue => pixel.0[2] as f64 > min_threshold && (pixel.0[2] as f64) < max_threshold,
         SortBy::Hue => {
             let (h, _, _) = rgb_to_hsv(*pixel);
             h > min_threshold && h < max_threshold
@@ -123,8 +123,8 @@ pub fn sort(
     img: RgbaImage,
     direction: Direction,
     sort_by: SortBy,
-    min_threshold: f32,
-    max_threshold: f32,
+    min_threshold: f64,
+    max_threshold: f64,
     reversed: bool,
 ) -> RgbaImage {
     let (width, height) = img.dimensions();

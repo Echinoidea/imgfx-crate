@@ -35,10 +35,10 @@ pub fn hex_to_rgb(hex: &str) -> Option<(u8, u8, u8)> {
     }
 }
 
-pub fn rgb_to_hsv(rgb: Rgba<u8>) -> (f32, f32, f32) {
-    let r = rgb.0[0] as f32 / 255.0;
-    let g = rgb.0[1] as f32 / 255.0;
-    let b = rgb.0[2] as f32 / 255.0;
+pub fn rgb_to_hsv(rgb: Rgba<u8>) -> (f64, f64, f64) {
+    let r = rgb.0[0] as f64 / 255.0;
+    let g = rgb.0[1] as f64 / 255.0;
+    let b = rgb.0[2] as f64 / 255.0;
 
     let max = r.max(g).max(b);
     let min = r.min(g).min(b);
@@ -63,8 +63,8 @@ pub fn rgb_to_hsv(rgb: Rgba<u8>) -> (f32, f32, f32) {
     (h, s, v)
 }
 
-pub fn calc_luminance(color: Rgba<u8>) -> f32 {
+pub fn calc_luminance(color: Rgba<u8>) -> f64 {
     let luminance =
-        0.2126 * (color[0] as f32) + 0.7152 * (color[1] as f32) + 0.0722 * (color[2] as f32);
+        0.2126 * (color[0] as f64) + 0.7152 * (color[1] as f64) + 0.0722 * (color[2] as f64);
     luminance
 }

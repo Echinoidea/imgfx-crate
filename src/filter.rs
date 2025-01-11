@@ -1,22 +1,18 @@
 use std::str::FromStr;
 
-use crate::{
-    calc_luminance, rgb_to_hsv,
-    utils::{get_channel_by_name_rgb_color, get_channel_by_name_rgba_u8},
-};
-use clap::builder::styling::RgbColor;
-use image::{
-    imageops::{blur, fast_blur},
-    DynamicImage, GenericImageView, ImageBuffer, Rgba, RgbaImage,
-};
+use crate::{calc_luminance, rgb_to_hsv, utils::get_channel_by_name_rgba_u8};
+use image::{DynamicImage, GenericImageView, ImageBuffer, Rgba, RgbaImage};
 use rayon::prelude::*;
 
+/// Specify whether the filter should replace colors that are INCLUDED in the range or EXCLUDED
+/// from the range.
 #[derive(Copy, Clone)]
 pub enum FilterType {
     Include,
     Exclude,
 }
 
+/// Clap FromStr
 impl FromStr for FilterType {
     type Err = String;
 
@@ -30,6 +26,8 @@ impl FromStr for FilterType {
     }
 }
 
+/// What property to filter by? Minimum and maximum values vary by property. For example, hue is
+/// 0-360, while red is 0-255.
 #[derive(Copy, Clone)]
 pub enum FilterParam {
     Luminance,
@@ -41,6 +39,7 @@ pub enum FilterParam {
     Value,
 }
 
+/// Clap FromStr
 impl FromStr for FilterParam {
     type Err = String;
 
@@ -66,58 +65,114 @@ impl FromStr for FilterParam {
     }
 }
 
-fn generate_filter(
-    filter_param: FilterParam,
-    min_threshold: f32,
-    max_threshold: f32,
-) -> impl Fn(&Rgba<u8>) -> bool {
-    move |pixel| match filter_param {
+/// A threshold range that the filter will check in between. This is a dedicated struct because
+/// for a CLI frontend, I want to minimize String usage after the initial arg parsing.
+#[derive(Clone, Copy, Debug)]
+pub struct ThresholdRange {
+    min: f64,
+    max: f64,
+}
+
+/// The filter to perform on the image.
+pub struct Filter {
+    pub filter_type: FilterType,
+    pub filter_param: FilterParam,
+    pub threshold_ranges: Vec<ThresholdRange>,
+}
+
+/// Parse a vector of strings which contain a number into a vector of ThresholdRanges.
+pub fn parse_filter_vec(thresholds_str_vec: Vec<String>) -> Vec<ThresholdRange> {
+    let mut thresholds: Vec<ThresholdRange> = vec![];
+
+    let mut iter = thresholds_str_vec.iter();
+    while let Some(min_str) = iter.next() {
+        if let Some(max_str) = iter.next() {
+            let min = min_str
+                .parse::<f64>()
+                .expect("Failed to parse min threshold as f64");
+            let max = max_str
+                .parse::<f64>()
+                .expect("Failed to parse max threshold as f64");
+
+            thresholds.push(ThresholdRange { min, max });
+        } else {
+            eprintln!(
+                "Warning: Threshold range input has an unmatched min value: {}",
+                min_str
+            );
+        }
+    }
+
+    thresholds
+}
+
+/// Generate the closure which returns a boolean whether the Rgba<u8> satisfies the filter.
+fn generate_filter(filter: Filter) -> impl Fn(&Rgba<u8>) -> bool {
+    move |pixel| match filter.filter_param {
         FilterParam::Luminance => {
             let luminance = calc_luminance(*pixel);
-            luminance > min_threshold && luminance < max_threshold
+            filter
+                .threshold_ranges
+                .iter()
+                .any(|range| luminance > range.min && luminance < range.max)
         }
-        FilterParam::Red => {
-            pixel.0[0] as f32 > min_threshold && (pixel.0[0] as f32) < max_threshold
-        }
-        FilterParam::Green => {
-            pixel.0[1] as f32 > min_threshold && (pixel.0[1] as f32) < max_threshold
-        }
-        FilterParam::Blue => {
-            pixel.0[2] as f32 > min_threshold && (pixel.0[2] as f32) < max_threshold
-        }
+        FilterParam::Red => filter.threshold_ranges.iter().any(|range| {
+            let red = pixel.0[0] as f64;
+            red > range.min && red < range.max
+        }),
+        FilterParam::Green => filter.threshold_ranges.iter().any(|range| {
+            let green = pixel.0[1] as f64;
+            green > range.min && green < range.max
+        }),
+        FilterParam::Blue => filter.threshold_ranges.iter().any(|range| {
+            let blue = pixel.0[2] as f64;
+            blue > range.min && blue < range.max
+        }),
         FilterParam::Hue => {
             let (h, _, _) = rgb_to_hsv(*pixel);
-            h > min_threshold && h < max_threshold
+            filter
+                .threshold_ranges
+                .iter()
+                .any(|range| h > range.min && h < range.max)
         }
         FilterParam::Saturation => {
             let (_, s, _) = rgb_to_hsv(*pixel);
-            s > min_threshold && s < max_threshold
+            filter
+                .threshold_ranges
+                .iter()
+                .any(|range| s > range.min && s < range.max)
         }
         FilterParam::Value => {
             let (_, _, v) = rgb_to_hsv(*pixel);
-            v > min_threshold && v < max_threshold
+            filter
+                .threshold_ranges
+                .iter()
+                .any(|range| v > range.min && v < range.max)
         }
     }
 }
 
+/// Perform the filter operation on the image. lhs will remap the colors before filtering.
 pub fn filter(
     img: DynamicImage,
     lhs: Option<Vec<String>>,
-    min_threshold: f32,
-    max_threshold: f32,
-    filter_type: FilterType,
-    filter_param: FilterParam,
+    filter: Filter,
     replace_with: Rgba<u8>,
 ) -> RgbaImage {
     let (width, height) = img.dimensions();
 
     let mut output: RgbaImage = ImageBuffer::new(width, height);
 
-    let filter = generate_filter(filter_param, min_threshold, max_threshold);
+    let filter_sorter = generate_filter(Filter {
+        filter_type: filter.filter_type,
+        filter_param: filter.filter_param,
+        threshold_ranges: filter.threshold_ranges,
+    });
 
-    output.enumerate_pixels_mut().for_each(|(x, y, pixel)| {
+    output.par_enumerate_pixels_mut().for_each(|(x, y, pixel)| {
         let in_pixel = img.get_pixel(x, y);
 
+        // Parse lhs
         let lhs = match lhs {
             Some(ref lhs) => (
                 get_channel_by_name_rgba_u8(&lhs[0], &in_pixel),
@@ -127,17 +182,20 @@ pub fn filter(
             None => (in_pixel[0], in_pixel[1], in_pixel[2]),
         };
 
-        match filter_type {
+        // Include or exclude
+        match filter.filter_type {
             FilterType::Include => {
-                if !filter(&in_pixel) {
+                // Remaps the lhs here
+                if !filter_sorter(&Rgba([lhs.0, lhs.1, lhs.2, 255u8])) {
                     *pixel = replace_with;
                 } else {
                     *pixel = in_pixel;
                 }
             }
 
+            // Or here
             FilterType::Exclude => {
-                if filter(&in_pixel) {
+                if filter_sorter(&Rgba([lhs.0, lhs.1, lhs.2, 255u8])) {
                     *pixel = replace_with;
                 } else {
                     *pixel = in_pixel;
