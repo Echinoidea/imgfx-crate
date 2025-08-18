@@ -1,11 +1,10 @@
-use clap::builder::styling::RgbColor;
-use image::Rgba;
+use image::{Rgb, Rgba};
 
-pub fn get_channel_by_name_rgb_color(name: &str, color: &RgbColor) -> u8 {
+pub fn get_channel_by_name_rgb_color(name: &str, color: &Rgb<u8>) -> u8 {
     match name {
-        "r" => color.r(),
-        "g" => color.g(),
-        "b" => color.b(),
+        "r" => color.0[0],
+        "g" => color.0[1],
+        "b" => color.0[2],
         _ => 0,
     }
 }

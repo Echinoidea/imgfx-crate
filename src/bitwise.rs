@@ -1,15 +1,18 @@
 use crate::utils::{get_channel_by_name_rgb_color, get_channel_by_name_rgba_u8};
-use clap::builder::styling::RgbColor;
-use image::{DynamicImage, GenericImageView, ImageBuffer, Rgba, RgbaImage};
+use image::{DynamicImage, GenericImageView, ImageBuffer, Rgb, Rgba, RgbaImage};
 use rayon::prelude::*;
 
 pub fn or(
     img: DynamicImage,
     lhs: Option<Vec<String>>,
     rhs: Option<Vec<String>>,
-    color: RgbColor,
+    color: Rgb<u8>,
     negate: bool,
 ) -> RgbaImage {
+    let r = color.0[0];
+    let g = color.0[1];
+    let b = color.0[2];
+
     let (width, height) = img.dimensions();
 
     let mut output: RgbaImage = ImageBuffer::new(width, height);
@@ -20,7 +23,7 @@ pub fn or(
             get_channel_by_name_rgb_color(&rhs[1], &color),
             get_channel_by_name_rgb_color(&rhs[2], &color),
         ),
-        None => (color.r(), color.g(), color.b()),
+        None => (r, g, b),
     };
 
     output.par_enumerate_pixels_mut().for_each(|(x, y, pixel)| {
@@ -52,9 +55,13 @@ pub fn and(
     img: DynamicImage,
     lhs: Option<Vec<String>>,
     rhs: Option<Vec<String>>,
-    color: RgbColor,
+    color: Rgb<u8>,
     negate: bool,
 ) -> RgbaImage {
+    let r = color.0[0];
+    let g = color.0[1];
+    let b = color.0[2];
+
     let (width, height) = img.dimensions();
 
     let mut output: RgbaImage = ImageBuffer::new(width, height);
@@ -65,7 +72,7 @@ pub fn and(
             get_channel_by_name_rgb_color(&rhs[1], &color),
             get_channel_by_name_rgb_color(&rhs[2], &color),
         ),
-        None => (color.r(), color.g(), color.b()),
+        None => (r, g, b),
     };
 
     output.par_enumerate_pixels_mut().for_each(|(x, y, pixel)| {
@@ -97,9 +104,13 @@ pub fn xor(
     img: DynamicImage,
     lhs: Option<Vec<String>>,
     rhs: Option<Vec<String>>,
-    color: RgbColor,
+    color: Rgb<u8>,
     negate: bool,
 ) -> RgbaImage {
+    let r = color.0[0];
+    let g = color.0[1];
+    let b = color.0[2];
+
     let (width, height) = img.dimensions();
 
     let mut output: RgbaImage = ImageBuffer::new(width, height);
@@ -110,7 +121,7 @@ pub fn xor(
             get_channel_by_name_rgb_color(&rhs[1], &color),
             get_channel_by_name_rgb_color(&rhs[2], &color),
         ),
-        None => (color.r(), color.g(), color.b()),
+        None => (r, g, b),
     };
 
     output.par_enumerate_pixels_mut().for_each(|(x, y, pixel)| {
@@ -279,7 +290,7 @@ mod tests {
             red.clone(),
             Some(vec!["r".to_string(), "g".to_string(), "b".to_string()]),
             None,
-            RgbColor(0, 0, 255),
+            Rgb([0, 0, 255]),
             false,
         );
 
@@ -303,7 +314,7 @@ mod tests {
             red.clone(),
             Some(vec!["r".to_string(), "g".to_string(), "b".to_string()]),
             None,
-            RgbColor(0, 0, 255),
+            Rgb([0, 0, 255]),
             false,
         );
 
@@ -327,7 +338,7 @@ mod tests {
             red.clone(),
             Some(vec!["r".to_string(), "g".to_string(), "b".to_string()]),
             None,
-            RgbColor(0, 0, 255),
+            Rgb([0, 0, 255]),
             false,
         );
 
