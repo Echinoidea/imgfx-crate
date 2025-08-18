@@ -3,7 +3,7 @@ use std::str::FromStr;
 use crate::{calc_luminance, rgb_to_hsv};
 use image::{Rgba, RgbaImage};
 
-#[derive(Copy, Clone)]
+#[derive(Copy, PartialEq, Clone)]
 pub enum Direction {
     Vertical,
     Horizontal,
@@ -23,7 +23,7 @@ impl FromStr for Direction {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, PartialEq, Clone)]
 pub enum SortBy {
     Luminance,
     Red,
