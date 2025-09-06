@@ -1,0 +1,15 @@
+#+title: TODO
+
+* TODO Make it so rgb inputs are not strings and are enums with valueparser trait
+* TODO Remove clone anti patterns
+* TODO Implement missing tests
+* TODO Remove dependency on clap Rgba and add parser instead
+
+* TODO Redo README and documentation.
+** TODO Add usage, examples, and cool stuff to GitHub.
+** TODO Link imgfx crate and imgfx-cli in GitHub descriptions
+** TODO Update crates.io readme
+
+* TODO Add different color spaces like OKLAB, LAB, LCH
+
+* TODO Make writup for why I like this project and what I learned
