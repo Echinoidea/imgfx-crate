@@ -1,18 +1,6 @@
-<<<<<<< HEAD
 use image::{Rgb, Rgba};
 
 pub fn get_channel_by_name_rgb_color(name: &str, color: &Rgb<u8>) -> u8 {
-=======
-use image::Rgba;
-
-pub struct RgbColor {
-    pub red: u8,
-    pub green: u8,
-    pub blue: u8,
-}
-
-pub fn get_channel_by_name_rgb_color(name: &str, color: &RgbColor) -> u8 {
->>>>>>> 29018c7 (fixed u8 under/overflow)
     match name {
         "r" => color.0[0],
         "g" => color.0[1],

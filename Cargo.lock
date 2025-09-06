@@ -317,11 +317,7 @@ dependencies = [
 
 [[package]]
 name = "imgfx"
-<<<<<<< HEAD
-version = "0.3.1"
-=======
-version = "0.2.3"
->>>>>>> 29018c7 (fixed u8 under/overflow)
+version = "0.3.2"
 dependencies = [
  "image",
  "rayon",

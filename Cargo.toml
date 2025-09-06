@@ -1,6 +1,6 @@
 [package]
 name = "imgfx"
-version = "0.3.1"
+version = "0.3.2"
 edition = "2021"
 authors = ["Gabriel Hooks"]
 description = "Image filtering and modulating with bitwise, arithmetic, and logical operations."

@@ -14,12 +14,7 @@ pub fn add(
     img: DynamicImage,
     lhs: Option<Vec<String>>,
     rhs: Option<Vec<String>>,
-<<<<<<< HEAD
     color: Rgb<u8>,
-=======
-    color: RgbColor,
-    raw: bool,
->>>>>>> 29018c7 (fixed u8 under/overflow)
 ) -> RgbaImage {
     let r = color.0[0];
     let g = color.0[1];
@@ -348,11 +343,7 @@ mod tests {
         let red = load_image("ff0000.png".to_string());
         let control_color = get_color_from_control(red.clone());
 
-<<<<<<< HEAD
         let out = add(red.clone(), None, None, Rgb([0, 0, 255]));
-=======
-        let out = add(red.clone(), None, None, RgbColor(0, 0, 255), true);
->>>>>>> 29018c7 (fixed u8 under/overflow)
 
         println!(
             "{:?} == {:?}",
